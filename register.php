@@ -1,10 +1,37 @@
 <?php
+include 'config.php'; // Database connection
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $username = trim($_POST['username']);
+    $password = $_POST['password'];
+
+    // Hash the password
+    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
+    // Prepare and execute insert statement
+    $stmt = $conn->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
+    $stmt->bind_param("ss", $username, $hashed_password);
+
+    if ($stmt->execute()) {
+        echo "Registration successful. <a href='login.php'>Login here</a>";
+    } else {
+        echo "Error: " . $stmt->error;
+    }
+    $stmt->close();
+}
+?>
+<!-- Registration Form -->
+<form method="post">
+    <input type="text" name="username" required placeholder="Username"><br>
+    <input type="password" name="password" required placeholder="Password"><br>
+    <button type="submit">Register</button>
+</form>
+<?php
 require_once 'config.php';
 
 /*
 // Role 3: Security, Auth Specialist, Server-side Validation & Password Hashing
 */
-//testetststststst
 
 require_once 'header.php';
 ?>
