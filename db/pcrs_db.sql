@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 13, 2026 at 05:25 AM
+-- Generation Time: Apr 14, 2026 at 07:17 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -31,8 +31,16 @@ CREATE TABLE `courses` (
   `id` int(11) NOT NULL,
   `course_code` varchar(20) NOT NULL,
   `course_name` varchar(100) NOT NULL,
-  `credits` int(11) NOT NULL
+  `credits` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `courses`
+--
+
+INSERT INTO `courses` (`id`, `course_code`, `course_name`, `credits`, `created_at`) VALUES
+(1, 'Test1234', 'Test Subject', 5, '2026-04-14 05:16:26');
 
 -- --------------------------------------------------------
 
@@ -57,7 +65,7 @@ CREATE TABLE `users` (
   `id` int(11) NOT NULL,
   `username` varchar(50) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `role` enum('admin','student') DEFAULT 'student',
+  `role` enum('admin','student') NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -66,7 +74,8 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `password`, `role`, `created_at`) VALUES
-(1, 'admin', '$2y$10$eK.4k9/2l/8... (generate a real hash using password_hash)', 'admin', '2026-04-13 03:24:50');
+(1, 'Admin', '$2y$10$rVz6JoSWlpzMmkwOx4n3zeXlxLUGuf0I/XIUs9vpDsKVK./kr8.Xy', 'admin', '2026-04-14 05:15:55'),
+(2, 'Student', '$2y$10$g9x9.o/e1DrN9RNS3bs2c.5cU9qUtvsafqSIjYTUykLIvhHMFsuiG', 'student', '2026-04-14 05:16:36');
 
 --
 -- Indexes for dumped tables
@@ -84,7 +93,7 @@ ALTER TABLE `courses`
 --
 ALTER TABLE `registrations`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `student_id` (`student_id`,`course_id`),
+  ADD UNIQUE KEY `unique_registration` (`student_id`,`course_id`),
   ADD KEY `course_id` (`course_id`);
 
 --
@@ -102,19 +111,19 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `courses`
 --
 ALTER TABLE `courses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `registrations`
 --
 ALTER TABLE `registrations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Constraints for dumped tables
