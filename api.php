@@ -24,7 +24,6 @@ try {
         $stmt->execute([$user_id]);
         echo json_encode(['status' => 'success', 'data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
     }
-
     elseif ($action === 'register' && $role === 'student') {
         $course_id = (int)$_POST['course_id'];
         $stmt = $pdo->prepare("SELECT id FROM registrations WHERE student_id = ? AND course_id = ?");
@@ -36,7 +35,6 @@ try {
             echo json_encode(['status' => 'success', 'message' => 'Registered Successfully']);
         }
     }
-
     elseif ($action === 'drop' && $role === 'student') {
         $course_id = (int)$_POST['course_id'];
         $pdo->prepare("DELETE FROM registrations WHERE student_id = ? AND course_id = ?")->execute([$user_id, $course_id]);

@@ -101,8 +101,11 @@ require_once 'header.php';
                     </thead>
                     <tbody>
                         <?php
-                        $stmt = $pdo->query("SELECT * FROM courses ORDER BY id DESC");
-                        while ($row = $stmt->fetch()):
+                        // 1. Fetch all courses into an array first
+                        $courses = $pdo->query("SELECT * FROM courses ORDER BY id DESC")->fetchAll();
+                        
+                        // 2. Loop only the table rows here
+                        foreach ($courses as $row):
                         ?>
                         <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                             <td class="fw-bold text-info py-3"><?= htmlspecialchars($row['course_code']) ?></td>
@@ -113,30 +116,35 @@ require_once 'header.php';
                                 <a href="delete_course.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="return confirm('Are you sure?');"><i class="bi bi-trash"></i></a>
                             </td>
                         </tr>
-
-                        <div class="modal fade" id="editModal<?= $row['id'] ?>" tabindex="-1">
-                            <div class="modal-dialog modal-dialog-centered">
-                                <div class="modal-content glass-card">
-                                    <div class="modal-header border-0">
-                                        <h5 class="modal-title">Edit Course</h5>
-                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                    </div>
-                                    <form method="POST">
-                                        <div class="modal-body">
-                                            <input type="hidden" name="course_id" value="<?= $row['id'] ?>">
-                                            <input type="text" name="course_code" class="form-control mb-3" value="<?= htmlspecialchars($row['course_code']) ?>" required>
-                                            <input type="text" name="course_name" class="form-control mb-3" value="<?= htmlspecialchars($row['course_name']) ?>" required>
-                                            <input type="number" name="credits" class="form-control mb-3" value="<?= $row['credits'] ?>" required>
-                                        </div>
-                                        <div class="modal-footer border-0">
-                                            <button type="submit" name="update_course" class="btn btn-gradient rounded-pill w-100">Save Changes</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                        <?php endwhile; ?>
+                        <?php endforeach; ?>
                     </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div> <?php foreach ($courses as $row): ?>
+<div class="modal fade" id="editModal<?= $row['id'] ?>" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-card">
+            <div class="modal-header border-0">
+                <h5 class="modal-title">Edit Course</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="course_id" value="<?= $row['id'] ?>">
+                    <input type="text" name="course_code" class="form-control mb-3" value="<?= htmlspecialchars($row['course_code']) ?>" required>
+                    <input type="text" name="course_name" class="form-control mb-3" value="<?= htmlspecialchars($row['course_name']) ?>" required>
+                    <input type="number" name="credits" class="form-control mb-3" value="<?= $row['credits'] ?>" required>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="submit" name="update_course" class="btn btn-gradient rounded-pill w-100">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<?php endforeach; ?>
                 </table>
             </div>
         </div>
