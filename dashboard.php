@@ -46,6 +46,29 @@ if (isset($_GET['register_course']) && $role == 'student') {
     }
 }
 
+// Handle Admin Updating Student
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && $role == 'admin' && isset($_POST['update_student'])) {
+    $student_id = (int)$_POST['student_id'];
+    $username = trim($_POST['username']);
+    $new_password = $_POST['new_password']; // Optional
+    
+    try {
+        if (!empty($new_password)) {
+            // Update username and password
+            $hashed = password_hash($new_password, PASSWORD_DEFAULT);
+            $stmt = $pdo->prepare("UPDATE users SET username = ?, password = ? WHERE id = ? AND role = 'student'");
+            $stmt->execute([$username, $hashed, $student_id]);
+        } else {
+            // Update username only
+            $stmt = $pdo->prepare("UPDATE users SET username = ? WHERE id = ? AND role = 'student'");
+            $stmt->execute([$username, $student_id]);
+        }
+        $message = "<div class='alert alert-info border-0 shadow-sm rounded-pill'><i class='bi bi-info-circle-fill me-2'></i> Student Profile Updated Successfully.</div>";
+    } catch(PDOException $e) {
+        $message = "<div class='alert alert-danger border-0 shadow-sm rounded-pill'><i class='bi bi-exclamation-triangle-fill me-2'></i> Error: Username might already exist.</div>";
+    }
+}
+
 require_once 'header.php';
 ?>
 
@@ -150,6 +173,77 @@ require_once 'header.php';
         </div>
     </div>
 </div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="glass-card p-4 h-100 border-top border-warning border-3">
+            <h4 class="mb-4 text-white fw-bold"><i class="bi bi-people me-2 text-warning"></i> Student Directory</h4>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover table-borderless align-middle mb-0">
+                    <thead style="border-bottom: 2px solid rgba(255,255,255,0.1);">
+                        <tr>
+                            <th class="text-muted pb-3">Student ID</th>
+                            <th class="text-muted pb-3">Username</th>
+                            <th class="text-muted pb-3">Enrolled Courses</th>
+                            <th class="text-muted pb-3 text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        // Fetch all students
+                        $students = $pdo->query("SELECT * FROM users WHERE role = 'student' ORDER BY id DESC")->fetchAll();
+                        
+                        foreach ($students as $student):
+                            // Count how many courses this student is registered for
+                            $countStmt = $pdo->prepare("SELECT COUNT(*) FROM registrations WHERE student_id = ?");
+                            $countStmt->execute([$student['id']]);
+                            $enrollmentCount = $countStmt->fetchColumn();
+                        ?>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td class="fw-bold text-warning py-3">#<?= $student['id'] ?></td>
+                            <td class="py-3"><?= htmlspecialchars($student['username']) ?></td>
+                            <td class="py-3"><span class="badge bg-secondary rounded-pill px-3"><?= $enrollmentCount ?></span></td>
+                            <td class="text-end py-3">
+                                <button class="btn btn-sm btn-outline-warning rounded-pill px-3 me-2" data-bs-toggle="modal" data-bs-target="#editStudentModal<?= $student['id'] ?>"><i class="bi bi-person-gear"></i></button>
+                                <a href="delete_student.php?id=<?= $student['id'] ?>" class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="return confirm('Are you sure you want to delete this student and all their registrations?');"><i class="bi bi-person-x"></i></a>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php foreach ($students as $student): ?>
+<div class="modal fade" id="editStudentModal<?= $student['id'] ?>" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-card">
+            <div class="modal-header border-0">
+                <h5 class="modal-title">Edit Student Account</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="student_id" value="<?= $student['id'] ?>">
+                    <div class="mb-3">
+                        <label class="form-label text-muted small">Username</label>
+                        <input type="text" name="username" class="form-control" value="<?= htmlspecialchars($student['username']) ?>" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small">Reset Password <span class="text-info">(Leave blank to keep current)</span></label>
+                        <input type="password" name="new_password" class="form-control" placeholder="New Password">
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="submit" name="update_student" class="btn btn-gradient w-100 rounded-pill">Update Student</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<?php endforeach; ?>
 
 <?php else: // Student View ?>
 <div class="row g-4">
